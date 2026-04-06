@@ -137,7 +137,7 @@ function Register-SingleUserYubiKey {
 
     # Call the function to generate the PIN if one was not defined by the user
     if (-not $Pin) {
-        $Pin = New-RandomPin 4 # TODO: Make this a parameter
+        $Pin = New-RandomPin 4
     }
     # Convert the PIN to a SecureString because powershellYK expects it!
     $securePin = ConvertTo-SecureString -String $Pin -AsPlainText -Force
