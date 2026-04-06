@@ -12,12 +12,16 @@ The User Principal Name (UPN) or Object ID of the target user in Entra ID.
 .PARAMETER Group
 The display name of a group in Entra ID. All members of this group will be registered with YubiKeys.
 
+.PARAMETER Pin
+The PIN that will be assigned to all YubiKeys that are enrolled - either the single key for -User, or all keys for -Group.
+If a PIN is not specified, one will be ranbdomly generated.
+
 .EXAMPLE
 Register-YubiKey -User bob@contoso.com
 Performs YubiKey configuration and registration of a passkey (FIDO2) credential for the specified user
 
 .EXAMPLE
-Register-YubiKey -Group "Users"
+Register-YubiKey -Group "Users" -Pin "1234"
 Registers YubiKeys for all members of the specified group. You will be prompted to insert a new YubiKey for each user.
 
 .NOTES
@@ -131,11 +135,12 @@ function Register-SingleUserYubiKey {
         return $pin
     }
 
-    # Call the function to generate the PIN
-    $pin = New-RandomPin 4 # TODO: Make this a parameter
-
+    # Call the function to generate the PIN if one was not defined by the user
+    if (-not $Pin) {
+        $Pin = New-RandomPin 4 # TODO: Make this a parameter
+    }
     # Convert the PIN to a SecureString because powershellYK expects it!
-    $securePin = ConvertTo-SecureString -String $pin -AsPlainText -Force
+    $securePin = ConvertTo-SecureString -String $Pin -AsPlainText -Force
 
     # Get general information about the YubiKey and store it in a variable
     try {
@@ -263,7 +268,7 @@ function Register-SingleUserYubiKey {
         'UPN' = $UserUPN
         'Model' = $yubiKeyInfo.PrettyName
         'Serial Number' = $yubiKeyInfo.SerialNumber
-        'PIN' = $pin
+        'PIN' = $Pin
     } | Export-Csv -Path $CSVFilePath -Append -NoTypeInformation -UseQuotes Never
 
     # Display success message only if not suppressed (for group operations)
@@ -275,7 +280,7 @@ function Register-SingleUserYubiKey {
         Write-Host "UPN: $UserUPN" -ForegroundColor Green
         Write-Host "Model: $($yubiKeyInfo.PrettyName)" -ForegroundColor Green
         Write-Host "Serial Number: $($yubiKeyInfo.SerialNumber)" -ForegroundColor Green
-        Write-Host "PIN: $pin" -ForegroundColor Green
+        Write-Host "PIN: $Pin" -ForegroundColor Green
         Write-Host ""
     }
 }
@@ -299,7 +304,12 @@ function Register-YubiKey {
                   HelpMessage = "The display name of a group in Entra ID. All members will be enrolled with YubiKeys.")]
         [ValidateNotNullOrEmpty()]
         [string]
-        $Group
+        $Group,
+
+        [Parameter(Mandatory=$False,
+                  HelpMessage = "The PIN that will be assigned to all YubiKeys that are enrolled - either the single key for -User, or all keys for -Group.")]
+        [string]
+        $Pin
     )
 
     begin {

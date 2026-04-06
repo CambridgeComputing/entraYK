@@ -73,9 +73,9 @@ Resulting Entra ID configuration:
 ---
 
 ### Register a YubiKey as device-bound passkey on behalf of a user or group
-This Cmdlet (`Register-YubiKey`) performs Enrollment On Behalf Of (EOBO) with Microsoft Entra ID. The Cmdlet uses **powershellYK** for YubiKey configuration and credential creation. It will generate a random PIN, name the YubiKey to contain Serial Number for asset tracking purposes, and where supported it will set the ForceChangePin flag and enable Restricted NFC. Programming output is presented on screen, as well as written to an output file (`output.csv`) in the user's working directory.
+This Cmdlet (`Register-YubiKey`) performs Enrollment On Behalf Of (EOBO) with Microsoft Entra ID. The Cmdlet uses **powershellYK** for YubiKey configuration and credential creation. It will generate a random PIN if one is not specified, name the YubiKey to contain Serial Number for asset tracking purposes, and where supported it will set the ForceChangePin flag and enable Restricted NFC. Programming output is presented on screen, as well as written to an output file (`output.csv`) in the user's working directory.
 
-You can register a YubiKey for a single user or for all members of a group. When using the `-Group` parameter, you will need a separate YubiKey for each group member.
+You can register a YubiKey for a single user or for all members of a group. When using the `-Group` parameter, you will need a separate YubiKey for each group member. To set the Pin to a static value, use the `-Pin` parameter.
 
 **Register a YubiKey on behalf of a single user:**
 ```powershell
@@ -95,6 +95,11 @@ alice@swjm.blog,YubiKey 5C NFC,23616243,5144
 bob@swjm.blog,YubiKey 5C NFC,17735649,4060
 ```
 ![](/images/Register-YubiKey.png)
+
+**Register YubiKeys for all members of a group using a stataic PIN for all users:**
+```powershell
+Register-YubiKey -Group "Users" -Pin "1234"
+```
 
 **NOTE**: When using `-Group`, ensure you have a sufficient supply of YubiKeys (one per group member). The cmdlet will prompt you to insert a new YubiKey for each user during the registration process.
 
